@@ -1,0 +1,7 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Api projet devise
+            description: Il s'agit de l'API du projet devise réalisé par Antoine Provain, Maxime Albert et Hugo Chaperon!
+            version: 1.0.0
+    
