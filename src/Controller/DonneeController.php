@@ -117,7 +117,7 @@ class DonneeController extends AbstractController
                         for($i = 1; $i < $lengh; $i++){
                             $date = new \DateTime(substr($data[0], 0, -7));
                             $donnee_id = $entityManager->getRepository(Donnee::class)->findOneByDate_changeAndMonnaie($date, $file_monnaies[$i - 1]);
-                            if($donnee_id[0]){
+                            if(count($donnee_id) >= 1){
                                 $donnee = $entityManager->getRepository(Donnee::class)->find($donnee_id[0]);
                                 if(!$donnee){
                                     return $this->json(['status' => 'error', 'message' => "La requete à la base de données n'a pas pu être effectuée !"], 500);
