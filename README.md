@@ -77,6 +77,25 @@ Projet : V1.0.0
 Symfony : 5.4.47
 PHP : 8.3.0
 
+## Installation
+
+1. Clonez le repository backend :
+   
+   ```bash
+   git clone <repository_url>
+   cd <backend_folder>
+   ```
+
+2. Installez les dépendances avec composer :
+   ```
+   symfony composer install
+   ```
+
+3. Lancez le serveur de développement Symfony :
+   ```
+   symfony serve
+   ```
+
 ## Authors
 Antoine Provain
 Maxime Albert
