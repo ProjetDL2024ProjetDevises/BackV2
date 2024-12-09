@@ -22,13 +22,14 @@ class MonnaieController extends AbstractController
     public function listAll(EntityManagerInterface $entityManager): JsonResponse
     {
         try{
-             $monnaies = $entityManager->getRepository(Monnaie::class)->findAll();
+            // SELECT * FROM monnaie;
+            $monnaies = $entityManager->getRepository(Monnaie::class)->findAll();
             $res = [];
             foreach($monnaies as $monnaie){
                 $res[] = $monnaie->getMonnaie();
             }        
             
-            return ($this->json($res));
+            return ($this->json(['status' => 'success', 'data' => $res], 200));
         }catch(ConnectionException $exeption){
             return $this->json(['status' => 'error', 'message' => "La connexion au serveur de base de donnée n'a pas pu être effectuée !"], 500);
         }

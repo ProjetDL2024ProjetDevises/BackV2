@@ -34,13 +34,10 @@ class DonneeController extends AbstractController
             $donnees = $entityManager->getRepository(Donnee::class)->findAll();
             $res = [];
             foreach($donnees as $donnee){
-                $res[] = ["monnaie" => $donnee->getMonnaie()];
-                $res[] = ["id" => $donnee->getId()];
-                $res[] = ["date" => $donnee->getDate_change()];
-                $res[] = ["taux" => $donnee->getTaux_change()];
+                $res[] = ["monnaie" => $donnee->getMonnaie(), "id" => $donnee->getId(), "date" => $donnee->getDate_change(), "taux" => $donnee->getTaux_change()];
             }        
 
-            return ($this->json($res));
+            return ($this->json(['status' => 'success', 'data' => $res]));
         }catch(ConnectionException $exeption){
             return $this->json(['status' => 'error', 'message' => "La connexion au serveur de base de donnée n'a pas pu être effectuée !"], 500);
         }
@@ -55,13 +52,13 @@ class DonneeController extends AbstractController
             $donnees = $entityManager->getRepository(Donnee::class)->findByMonnaie($monnaie);
             $res = [];
             foreach($donnees as $donnee){
-                $res[] = ["monnaie" => $donnee->getMonnaie()];
-                $res[] = ["id" => $donnee->getId()];
-                $res[] = ["date" => $donnee->getDate_change()];
-                $res[] = ["taux" => $donnee->getTaux_change()];
+                $res[] = ["monnaie" => $donnee->getMonnaie(), "id" => $donnee->getId(), "date" => $donnee->getDate_change(), "taux" => $donnee->getTaux_change()];
+                
             }        
-
-            return ($this->json($res));
+            if($res == []){
+                return ($this->json(['status' => 'error', 'message' => "Aucune donnée pour cette monnaie : $monnaie"], 400));
+            }
+            return ($this->json(['status' => 'success', 'data' => $res]));
         }catch(ConnectionException $exeption){
             return $this->json(['status' => 'error', 'message' => "La connexion au serveur de base de données n'a pas pu être effectuée !"], 500);
         }
@@ -116,14 +113,26 @@ class DonneeController extends AbstractController
                     }
                 }else{
                     try{
-                        // Pour les lignes suivantes on crée une donnée et on isert dans la base de données 
+                        // Pour les lignes suivantes on crée une donnée et on insert dans la base de données 
                         for($i = 1; $i < $lengh; $i++){
-                            $donnee = new Donnee();
-                            $donnee->setMonnaie($file_monnaies[$i - 1]);
-                            $donnee->setDate_change(new DateTime($data[0]));
-                            $donnee->setTaux_change($data[$i]);
-                            $entityManager->persist($donnee);
-                            $entityManager->flush();
+                            $date = new \DateTime(substr($data[0], 0, -7));
+                            $donnee_id = $entityManager->getRepository(Donnee::class)->findOneByDate_changeAndMonnaie($date, $file_monnaies[$i - 1]);
+                            if($donnee_id[0]){
+                                $donnee = $entityManager->getRepository(Donnee::class)->find($donnee_id[0]);
+                                if(!$donnee){
+                                    return $this->json(['status' => 'error', 'message' => "La requete à la base de données n'a pas pu être effectuée !"], 500);
+                                }else{
+                                    $donnee->setTaux_change($data[$i]);
+                                    $entityManager->flush();    
+                                }
+                            }else{
+                                $donnee = new Donnee();
+                                $donnee->setMonnaie($file_monnaies[$i - 1]);
+                                $donnee->setDate_change(new DateTime($data[0]));
+                                $donnee->setTaux_change($data[$i]);
+                                $entityManager->persist($donnee);
+                                $entityManager->flush();
+                            }
                         }
                     }catch(ConnectionException $e){
                         return $this->json(['status' => 'error', 'message' => "La connexion au serveur de base de données n'a pas pu être effectuée !"], 500);
